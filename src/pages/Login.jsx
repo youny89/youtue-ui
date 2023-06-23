@@ -3,6 +3,8 @@ import styled from 'styled-components'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { useState } from 'react';
+import { useDispatch } from "react-redux"
+import {loginStart,loginFail,loginSuccess} from "../redux/userSlice"
 
 const Container = styled.div`
     height: 100vh;
@@ -112,9 +114,10 @@ const ErrorMessage = styled.div`
     margin-bottom:20px;
 `
 const Login = () => {
+
+    const dispatch = useDispatch();
+
     const [isLogin,setIsLogin] = useState(true);
-    const [isSubmiting,setIsSubmiting] = useState(false);
-    const [error, setError] = useState(null);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -130,24 +133,26 @@ const Login = () => {
             passwordConfirm
         }
         try {
-            setIsSubmiting(true)
+            dispatch(loginStart())
             const response =await fetch(requestUrl,{
                 method:"post",
                 headers : { "Content-Type":"application/json"},
                 body:JSON.stringify(payload)
             })
-
+            if(response.ok) {
+                const data = await response.json();
+                dispatch(loginSuccess(data));
+            }
             if(!response.ok && response.status === 400) {
                 const errorData = await response.json();
-                setError(errorData.message);
-            }
-            
+                console.log('errorData : ',errorData);
+                dispatch(loginFail(errorData.message));
+            } 
+            console.log('콘솔 찎히니?');
         } catch (error) {
             console.log(error);
-            setError(error);
-        } finally {
-            setIsSubmiting(false)
-        }
+            dispatch(loginFail())
+        } 
     }
 
     return (
@@ -160,7 +165,7 @@ const Login = () => {
                     </Link>
                 </BackButton>
                 <Title>Youtube-Clone {isLogin ? '로그인':'회원가입'}</Title>
-                {error && <ErrorMessage>{error}</ErrorMessage>}
+                {/* {error && <ErrorMessage>{error}</ErrorMessage>} */}
                 <InputItem>
                     <label htmlFor='email'>이메일</label>
                     <input type='email' name='email' placeholder='email' required onChange={e=> setEmail(e.target.value)}/>
@@ -176,7 +181,7 @@ const Login = () => {
                 </InputItem> 
                 }
                 <InputItem>
-                    <button disabled={isSubmiting} type="submit" onClick={handleSubmit}>{isLogin ? '로그인':'회원가입'}</button>
+                    <button  type="submit" onClick={handleSubmit}>{isLogin ? '로그인':'회원가입'}</button>
                 </InputItem>
                 <ActionButton onClick={()=>setIsLogin(prev=>!prev)}>{isLogin ? '회원가입 하러 가기':'로그인 하기'} <ArrowForwardOutlinedIcon /></ActionButton>
             </form>

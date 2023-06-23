@@ -2,7 +2,6 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
-import SubscriptionsOutlinedIcon from "@mui/icons-material/SubscriptionsOutlined";
 import VideoLibraryOutlinedIcon from "@mui/icons-material/VideoLibraryOutlined";
 import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
 import LibraryMusicOutlinedIcon from "@mui/icons-material/LibraryMusicOutlined";
@@ -15,9 +14,10 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useSelector } from "react-redux"
+
 
 const Container = styled.div`
     flex:2;    
@@ -122,7 +122,7 @@ const Title = styled.div`
     margin-bottom: 20px;
 `
 const Sidebar = () => {
-
+  const { currentUser } = useSelector((state)=>state.user);
   return (
     <Container>
         <Wrapper>
@@ -167,13 +167,16 @@ const Sidebar = () => {
 
             <Hr />
             <Login>
-                <p>로그인하면 동영상에 좋아요를 표시하고 댓글을 달거나 구독할 수 있습니다</p>
-                <Link to="/login">
-                    <AccountCircleOutlinedIcon/>
-                    로그인
-                </Link>
+                { !currentUser && <>
+                    <p>로그인하면 동영상에 좋아요를 표시하고 댓글을 달거나 구독할 수 있습니다</p>
+                    <Link to="/login">
+                        <AccountCircleOutlinedIcon/>
+                        로그인
+                    </Link>
+                    <Hr />
+                </>}
+
             </Login>
-            <Hr />
             {/* 내가 구독한 채널 리스트 */}
             <Title>탐색</Title>
             <Item>

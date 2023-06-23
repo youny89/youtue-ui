@@ -4,6 +4,8 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 import LightModeIcon from '@mui/icons-material/LightMode';
 import NightlightIcon from '@mui/icons-material/Nightlight';
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import Avatar from "./Avatar"
 
 const Container = styled.div`
   background: ${({theme})=>theme.bg};
@@ -105,7 +107,7 @@ const Tags = styled.div`
   }
 `
 const Navbar = ({darkMode,setDarkMode}) => {
-
+  const { currentUser } = useSelector(state=>state.user);
   return (
     <Container>
       <Wrapper>
@@ -115,11 +117,12 @@ const Navbar = ({darkMode,setDarkMode}) => {
         </Search>
         <Icons>
           <button onClick={setDarkMode}>{darkMode ? <LightModeIcon/> : <NightlightIcon/>}</button>
-          <LoginButton>
+          {!currentUser && <LoginButton>
             <Link to="/login">
               <AccountCircleOutlinedIcon /> 로그인
             </Link>
-          </LoginButton>
+          </LoginButton>}
+          {currentUser && <Avatar url={currentUser.avatar}/>}
         </Icons>
       </Wrapper>
       <Tags>
