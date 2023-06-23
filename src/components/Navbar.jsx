@@ -3,6 +3,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 import LightModeIcon from '@mui/icons-material/LightMode';
 import NightlightIcon from '@mui/icons-material/Nightlight';
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
   background: ${({theme})=>theme.bg};
@@ -81,18 +82,20 @@ const LoginButton = styled.div`
     outline:none;
     border:solid 1px ${({theme})=>theme.secondary};;
     cursor: pointer;
-    color:${({theme})=>theme.primary};
-    display: flex;
-    align-items: center;
     gap:10px;
     font-weight: bold;
+    a{
+      display: flex;
+      align-items: center;
+      color:${({theme})=>theme.primary};
+    }
 `
 const Tags = styled.div`
   display: flex;
   align-items: center;
   gap:10px;
   margin-top:20px;
-  span {
+  a {
     padding:10px;
     border-radius: 6px;
     background:${({theme})=>theme.secondary};
@@ -113,17 +116,19 @@ const Navbar = ({darkMode,setDarkMode}) => {
         <Icons>
           <button onClick={setDarkMode}>{darkMode ? <LightModeIcon/> : <NightlightIcon/>}</button>
           <LoginButton>
-            <AccountCircleOutlinedIcon /> 로그인
+            <Link to="/login">
+              <AccountCircleOutlinedIcon /> 로그인
+            </Link>
           </LoginButton>
         </Icons>
       </Wrapper>
       <Tags>
-        <span>전체</span>
-        <span>음악</span>
-        <span>뉴스</span>
-        <span>실시간</span>
-        <span>요리</span>
-        <span>최근에 업로드된 영상</span>
+        <Link to="/">전체</Link>
+        <Link to="/tags?tags=음악">음악</Link>
+        <Link to="/tags?tags=뉴스">뉴스</Link>
+        <Link to="/tags?tags=실시간">실시간</Link>
+        <Link to="/tags?tags=요리">요리</Link>
+        <Link to="/tags?tags=최신">최근에 업로드된 영상</Link>
       </Tags>
     </Container>
   )

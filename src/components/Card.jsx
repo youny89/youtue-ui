@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import timeago from '../utils/timeago'
+import Avatar from './Avatar'
 
 const Container = styled.div`
     display: ${({type})=> type=== 'sm' && 'flex'};
@@ -37,30 +39,23 @@ const Info = styled.div`
     }
     p{
         font-size:${({type})=>type==='sm'?'12px':'14px'};;
-        color:gray;
+        color:${({theme}) => theme.lightText};
+        margin-top:3px;
     }
 `
-const Avatar = styled.span`
-    height:30px;
-    width:30px;
-    background-color: lightgray;
-    border-radius: 100%;;
-    display: ${({type})=>type==='sm' && 'none'};
-`
-
-const Card = ({type}) => {
+const Card = ({type,video}) => {
   return (
-    <Link to="/video/test">
+    <Link to={`/video/${video._id}`}>
         <Container type={type}>
             <ImageContainer>
                 <Img />
             </ImageContainer>
             <Info type={type}>
-                <Avatar type={type}/>
+                { <Avatar type={type} url={video.creator?.avatar}/>}
                 <div>
-                    <h3>{"미국-멕시코 라이벌 경기에서 나온 대난투극...참다못한 심판의 이례적인 조기종료까지? / 스포츠머그".slice(0,36)} ...</h3>
-                    <p>스포츠 머그</p>
-                    <p>조회수 22만회 | 3시간 전</p>
+                    <h3>{video.title.slice(0,36)} ...</h3>
+                    <p>{video.creator?.name}</p>
+                    <p>조회수 {video.views}회 | {timeago(video.createdAt)}</p>
                 </div>
             </Info>
         </Container>

@@ -132,7 +132,7 @@ const SubscribeButton = styled.button`
     }
   
 `
-const Video = () => {
+const Video = ({video}) => {
   return (
     <Container>
       <Content>

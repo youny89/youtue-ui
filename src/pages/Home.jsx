@@ -1,5 +1,6 @@
 import styled from "styled-components"
 import Card from '../components/Card'
+import { useEffect, useState } from "react";
 
 const Container = styled.div`
   display: flex;
@@ -8,11 +9,19 @@ const Container = styled.div`
   gap:14px;
 `;
 
-const Home = () => {
-  
+const Home = ({type}) => {
+  const [videos, setVideos] = useState([]);
+  useEffect(()=>{
+    const fetchData = async() => {
+      const response = await (await fetch(`video/find/${type}`)).json();
+      setVideos(response)
+    }
+    fetchData();
+  },[type])
+  console.log(videos);
   return (
     <Container>
-        {[1,2,3,4,5,6,7,8,9,10,11,12].map(i=><Card key={i}/>)}
+        {videos?.map(video=><Card key={video._id} video={video}/>)}
     </Container>
   )
 }

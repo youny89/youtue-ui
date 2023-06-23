@@ -69,16 +69,19 @@ const LogoText = styled.span`
 const Item = styled.div`
     display : flex;
     align-items: center;
-    gap:30px;
-    color:${({theme})=>theme.base};;
     padding:8px;
     border-radius: 8px;
     transition: 500ms;
     cursor: pointer;
     margin-bottom:10px;
-    svg{
-        color:${({theme})=>theme.lightText};
+    a{
+        display : flex;
+        align-items: center;
+        gap:30px;
+        color:${({theme})=>theme.lightText};;
+
     }
+
     &:hover {
         background:${({theme})=>theme.secondary};
         color:${({theme})=>theme.text};
@@ -99,13 +102,13 @@ const Login = styled.div`
         text-align: center;
         line-height: 18px;
     }
-    button {
+    a {
         padding:4px 12px;
         border-radius: 6px;
         outline:none;
-        border:solid 1px var(--primary-color);
+        border:solid 1px ${({theme})=>theme.primary};
         cursor: pointer;
-        color:var(--primary-color);
+        color:${({theme})=>theme.primary};
         display: flex;
         align-items: center;
         gap:10px;
@@ -123,7 +126,7 @@ const Sidebar = () => {
   return (
     <Container>
         <Wrapper>
-            <Link>
+            <Link to="/">
                 <Logo>
                     <button><MenuIcon/></button>
                     <LogoImg src="/logo.png" alt='logo'/>
@@ -131,34 +134,44 @@ const Sidebar = () => {
                 </Logo>
             </Link>
             <Item>
-                <HomeIcon/>
-                홈
+                <Link to="/">
+                    <HomeIcon/>
+                    홈
+                </Link>
             </Item>
             <Item>
-                <ExploreOutlinedIcon />
-                탐색
+                <Link to="/shorts">
+                    <ExploreOutlinedIcon />
+                    Shorts
+                </Link>
             </Item>
             <Item>
-                <ThumbUpAltIcon />
-                좋아요 표시한 동영상
+                <Link to="/like">
+                    <ThumbUpAltIcon />
+                    좋아요 표시한 동영상
+                </Link>
             </Item>
             <Hr />
             <Item>
-                <VideoLibraryOutlinedIcon />
-                구독
+                <Link to="/subscription">
+                    <VideoLibraryOutlinedIcon />
+                    구독
+                </Link>
             </Item>
             <Item>
-                <HistoryOutlinedIcon />
-                시청기록
+                <Link>
+                    <HistoryOutlinedIcon />
+                    시청기록
+                </Link>
             </Item>
 
             <Hr />
             <Login>
                 <p>로그인하면 동영상에 좋아요를 표시하고 댓글을 달거나 구독할 수 있습니다</p>
-                <button>
+                <Link to="/login">
                     <AccountCircleOutlinedIcon/>
                     로그인
-                </button>
+                </Link>
             </Login>
             <Hr />
             {/* 내가 구독한 채널 리스트 */}
