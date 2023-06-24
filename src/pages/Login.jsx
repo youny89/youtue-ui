@@ -1,10 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
+import GoogleIcon from '@mui/icons-material/Google';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { useState } from 'react';
 import { useDispatch } from "react-redux"
 import {loginStart,loginFail,loginSuccess} from "../redux/userSlice"
+import { signInWithPopup } from "firebase/auth"
+import { auth, provider} from "../firebase"
 
 const Container = styled.div`
     height: 100vh;
@@ -107,6 +110,28 @@ const ActionButton = styled.div`
         gap:20px;
     }
 `
+const GoogleButton = styled.div`
+    margin-top:20px;
+    border:solid 1px ${({theme})=>theme.secondary}; 
+    padding:10px;
+    background-color: transparent;
+    color:${({theme})=>theme.text};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap:12px;
+    cursor: pointer;
+    font-size:13px;
+    transition:0.5s ease-in-out;
+    border-radius:6px;
+    svg{
+        font-size:20px;
+    }
+    &:hover {
+        opacity: 0.7;
+        gap:20px;
+    }
+`
 const ErrorMessage = styled.div`
     padding:8px;
     color:tomato;
@@ -122,6 +147,38 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
 
+    const handleLoginWithGoogle = async () => {
+        try {
+            dispatch(loginStart())
+            const { user } = await signInWithPopup(auth, provider);
+            const payload = {
+                name : user?.name ,
+                email : user?.email,
+                avatar : user?.photoURL
+            }
+            const response = await fetch('auth/social/google',{
+                method:"post",
+                headers : { "Content-Type":"application/json" },
+                body : JSON.stringify(payload)
+            })
+            if(response.ok) {
+                const data = await response.json();
+                dispatch(loginSuccess(data));
+                console.log('로그인 성공!')
+                naviate('/login')
+            }
+            if(!response.ok && response.status === 400) {
+                const errorData = await response.json();
+                console.log('errorData : ',errorData);
+                dispatch(loginFail(errorData.message));
+                
+            } 
+            
+        } catch (error) {
+            dispatch(loginFail('로그인 실패.'));
+            console.log(error);            
+        }
+    }
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -186,6 +243,10 @@ const Login = () => {
                     <button  type="submit" onClick={handleSubmit}>{isLogin ? '로그인':'회원가입'}</button>
                 </InputItem>
                 <ActionButton onClick={()=>setIsLogin(prev=>!prev)}>{isLogin ? '회원가입 하러 가기':'로그인 하기'} <ArrowForwardOutlinedIcon /></ActionButton>
+                <GoogleButton onClick={handleLoginWithGoogle}>
+                    <GoogleIcon/>
+                    구글 로그인
+                </GoogleButton>
             </form>
         </Container>
     )
