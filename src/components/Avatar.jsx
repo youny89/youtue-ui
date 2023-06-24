@@ -17,8 +17,8 @@ const DefaultAvatar = styled.span`
     object-fit: cover;
 ` 
 
-const Avatar = ({type, url}) => {
-  return url ? <StyledAvatar type={type} src={url}/> : <DefaultAvatar type={type}/>
+const Avatar = ({type, url, handleClick}) => {
+  return url ? <StyledAvatar type={type} src={url} onClick={handleClick}/> : <DefaultAvatar type={type}/>
 }
 
 export default Avatar

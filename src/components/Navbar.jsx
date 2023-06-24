@@ -1,11 +1,16 @@
 import styled from "styled-components";
+import VideoCallIcon from '@mui/icons-material/VideoCall';
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import LogoutIcon from '@mui/icons-material/Logout';
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 import LightModeIcon from '@mui/icons-material/LightMode';
 import NightlightIcon from '@mui/icons-material/Nightlight';
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import Avatar from "./Avatar"
+import { useState } from "react";
+import { logout } from "../redux/userSlice";
+import {setMode  } from "../redux/themeSlice"
 
 const Container = styled.div`
   background: ${({theme})=>theme.bg};
@@ -60,6 +65,7 @@ const Icons = styled.div`
   display: flex;
   align-items: center;
   gap:40px;
+  position: relative;
 
   button{
     width:40px;
@@ -106,8 +112,46 @@ const Tags = styled.div`
     cursor: pointer;
   }
 `
-const Navbar = ({darkMode,setDarkMode}) => {
+const UserMenu = styled.ul`
+  position: absolute;
+  top:60px;
+  right:0;
+  list-style: none;
+  background-color:${({theme})=>theme.darkerBg};
+  color:${({theme})=>theme.lightText};
+  width:220px;
+  height:160px;
+  gap:40px;
+  box-shadow: 2px 3px 4px 4px rgba(0,0,0,0.5);
+  border-radius: 10px;
+  
+  li {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding:10px 20px;
+    &:hover{
+      background-color: ${({theme}) => theme.bg};
+    }
+  }
+
+`
+
+const Navbar = () => {
   const { currentUser } = useSelector(state=>state.user);
+  const { dark } = useSelector(state=>state.theme)
+  const [ openUserMenu, setOpenUserMenu ] = useState(false);
+  const navigate = useNavigate();
+  const dispath = useDispatch();
+  const handleLogout= async () => {
+    dispath(logout());
+    await fetch('auth/logout',{ method : 'post'});
+    navigate('/login');
+  }
+  const handleTheme = () => {
+    dispath(setMode());
+  }
   return (
     <Container>
       <Wrapper>
@@ -116,13 +160,25 @@ const Navbar = ({darkMode,setDarkMode}) => {
           <button><SearchOutlinedIcon /></button>
         </Search>
         <Icons>
-          <button onClick={setDarkMode}>{darkMode ? <LightModeIcon/> : <NightlightIcon/>}</button>
+          <button onClick={handleTheme}>{dark ? <LightModeIcon/> : <NightlightIcon/>}</button>
           {!currentUser && <LoginButton>
             <Link to="/login">
               <AccountCircleOutlinedIcon /> 로그인
             </Link>
           </LoginButton>}
-          {currentUser && <Avatar url={currentUser.avatar}/>}
+          {currentUser && <>
+            <Avatar url={currentUser.avatar} handleClick={()=>setOpenUserMenu(prev=>!prev)}/>
+            { openUserMenu && <UserMenu>
+              <li>
+                <VideoCallIcon/>
+                비디오 업로드
+                </li>
+              <li onClick={handleLogout}>
+                <LogoutIcon />
+                로그아웃
+              </li>
+            </UserMenu>}
+          </>}
         </Icons>
       </Wrapper>
       <Tags>
