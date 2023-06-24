@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
@@ -114,7 +114,7 @@ const ErrorMessage = styled.div`
     margin-bottom:20px;
 `
 const Login = () => {
-
+    const naviate = useNavigate()
     const dispatch = useDispatch();
 
     const [isLogin,setIsLogin] = useState(true);
@@ -142,13 +142,15 @@ const Login = () => {
             if(response.ok) {
                 const data = await response.json();
                 dispatch(loginSuccess(data));
+                console.log('로그인 성공!')
+                naviate('/login')
             }
             if(!response.ok && response.status === 400) {
                 const errorData = await response.json();
                 console.log('errorData : ',errorData);
                 dispatch(loginFail(errorData.message));
+                
             } 
-            console.log('콘솔 찎히니?');
         } catch (error) {
             console.log(error);
             dispatch(loginFail())
