@@ -45,17 +45,17 @@ const Info = styled.div`
 `
 const Card = ({type,video}) => {
   return (
-    <Link to={`/video/${video._id}`}>
+    <Link to={`/video/${video?._id}`}>
         <Container type={type}>
             <ImageContainer>
                 <Img />
             </ImageContainer>
             <Info type={type}>
-                { <Avatar type={type} url={video.creator?.avatar}/>}
+                { <Avatar type={type} url={video?.creator?.avatar}/>}
                 <div>
-                    <h3>{video.title.slice(0,36)} ...</h3>
-                    <p>{video.creator?.name}</p>
-                    <p>조회수 {video.views}회 | {timeago(video.createdAt)}</p>
+                    <h3>{video?.title?.slice(0,36)} ...</h3>
+                    <p>{video?.creator?.name}</p>
+                    <p>조회수 {video?.views}회 | {timeago(video?.createdAt)}</p>
                 </div>
             </Info>
         </Container>

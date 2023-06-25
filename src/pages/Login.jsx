@@ -3,8 +3,8 @@ import styled from 'styled-components'
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
-import { useState } from 'react';
-import { useDispatch } from "react-redux"
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from "react-redux"
 import {loginStart,loginFail,loginSuccess} from "../redux/userSlice"
 import { signInWithPopup } from "firebase/auth"
 import { auth, provider} from "../firebase"
@@ -23,7 +23,7 @@ const Container = styled.div`
         padding:20px;
         width:400px;
         height: fit-content;
-        box-shadow: 1px 2px 8px 3px rgba(0,0,0,0.6);
+        box-shadow: 1px 3px 4px 3px rgba(0,0,0,0.4);
         margin-top:100px;
         border-radius: 10px;
         position: relative;
@@ -147,6 +147,9 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
 
+    const { currentUser } = useSelector(state=>state.user);
+
+
     const handleLoginWithGoogle = async () => {
         try {
             dispatch(loginStart())
@@ -165,7 +168,8 @@ const Login = () => {
                 const data = await response.json();
                 dispatch(loginSuccess(data));
                 console.log('로그인 성공!')
-                naviate('/login')
+
+                naviate('/')
             }
             if(!response.ok && response.status === 400) {
                 const errorData = await response.json();

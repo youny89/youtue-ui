@@ -13,9 +13,11 @@ import storage from 'redux-persist/lib/storage'
 
 import userReducer from "./userSlice";
 import themeReducer from "./themeSlice";
+import videoReducer from "./videoSlice";
 
 const rootReducer = combineReducers({
     user: userReducer,
+    video: videoReducer,
     theme: themeReducer
 });
 

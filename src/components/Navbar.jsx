@@ -122,9 +122,9 @@ const UserMenu = styled.ul`
   width:220px;
   height:160px;
   gap:40px;
-  box-shadow: 2px 3px 4px 4px rgba(0,0,0,0.5);
+  box-shadow: 2px 3px 4px 4px rgba(0,0,0,0.2);
   border-radius: 10px;
-  
+  overflow: hidden;
   li {
     cursor: pointer;
     display: flex;
@@ -132,10 +132,10 @@ const UserMenu = styled.ul`
     align-items: center;
     padding:10px 20px;
     &:hover{
-      background-color: ${({theme}) => theme.bg};
+      opacity: 0.7;
+      background-color:${({theme})=>theme.secondary};
     }
   }
-
 `
 
 const Navbar = () => {

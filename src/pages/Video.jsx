@@ -5,6 +5,18 @@ import ShareIcon from '@mui/icons-material/Share';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Comments from "../components/Comments"
 import Card from "../components/Card"
+import { useLocation } from 'react-router-dom';
+import { useCallback, useEffect} from 'react';
+import timeago from '../utils/timeago';
+import { useSelector, useDispatch } from "react-redux"
+import {
+  startFetch,
+  successFetch,
+  failFetch,
+  like,
+  disLike
+} from "../redux/videoSlice"
+import Avatar from '../components/Avatar';
 
 const Container = styled.div`
   padding:20px;
@@ -70,11 +82,14 @@ const Buttons = styled.div`
 `
 const LikesButtons = styled.div`
   display: flex;
+  color : ${({liked}) => liked ?'green':''};
+
   button{
     &:first-child {
       border-top-left-radius: 20px;
       border-bottom-left-radius: 20px;
       position: relative;
+
       &::after {
         position: absolute;
         right:0;
@@ -90,12 +105,7 @@ const LikesButtons = styled.div`
     }
   }
 `
-const Avatar = styled.span`
-  width:40px;
-  height:40px;
-  border-radius: 50%;
-  background-color: springgreen;
-`
+
 const Info = styled.div`
   background-color: ${({theme})=>theme.secondary};
   padding:20px;
@@ -124,7 +134,7 @@ const SubscribeButton = styled.button`
     border:none;
     outline:none;
     cursor: pointer;
-    background:${({theme})=>theme.secondary};
+    background:${({theme})=>theme.darkerBg};
     color:${({theme})=> theme.text};
     border-radius: 20px;
     &:hover{
@@ -132,7 +142,46 @@ const SubscribeButton = styled.button`
     }
   
 `
-const Video = ({video}) => {
+const Video = () => {
+  const location = useLocation();
+  const videoId = location.pathname.split('video/')[1];
+  const { loadedVideo } = useSelector(state=>state.video);
+  const { currentUser } = useSelector(state=>state.user);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    
+    const loadData = async () => {
+      dispatch(startFetch())
+
+      try {
+        const response = await fetch(`/video/${videoId}`);
+        if(response.ok) {
+          const video = await response.json();
+          dispatch(successFetch(video));
+        } else{
+          dispatch(failFetch())
+        }
+      } catch (error) {
+        dispatch(failFetch())
+      } 
+
+    }
+
+    loadData();
+  },[videoId, dispatch])
+
+
+  const handleLike = useCallback(async () => {
+    await fetch(`/video/${videoId}/like`,{ method:'put' });
+    dispatch(like(currentUser._id))
+  },[videoId])
+
+  const handleDisLike = async () => {
+      await fetch(`/video/${videoId}/dislike`,{ method:'put' });
+      dispatch(disLike(currentUser._id))
+  }
+
   return (
     <Container>
       <Content>
@@ -142,27 +191,30 @@ const Video = ({video}) => {
             height="480"
             src="https://www.youtube.com/embed/S4Ts9IXnXoQ"
             title="[4K] 220515 정은지 - &#39;소녀의 소년&#39; 직캠 in Beautiful Mint Life 2022"
-            frameborder="0"
+            frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen></iframe>
+            allowFullScreen></iframe>
         </VideoWrapper>
-        <Title>[4K] 220515 정은지 - '소녀의 소년' 직캠 in Beautiful Mint Life 2022</Title>
+        <Title>{loadedVideo?.title}</Title>
         <Detail>
           <Creator>
-            <Avatar />
+            <Avatar url={loadedVideo?.creator?.avatar}/>
             <div>
-              <span>채널이름</span>
-              <small>구독자: 2.58천명</small>
+              <span>{loadedVideo?.creator?.name}</span>
+              <small>구독자: 0명</small>
             </div>
             <SubscribeButton>구독</SubscribeButton>
           </Creator>
           <Buttons>
             <LikesButtons>
-              <button>
-                <ThumbUpOffAltIcon />
-                1,200
+              <button onClick={handleLike}>
+                <ThumbUpOffAltIcon/>
+                {loadedVideo?.likes?.length}
               </button>
-              <button><ThumbDownOffAltIcon/></button>
+              <button onClick={handleDisLike}>
+                <ThumbDownOffAltIcon/>
+                {loadedVideo?.disLikes?.length}
+                </button>
             </LikesButtons>
             <button style={{borderRadius:"12px"}}>
               <ShareIcon/>
@@ -174,12 +226,12 @@ const Video = ({video}) => {
           </Buttons>
         </Detail>
         <Info>
-          <p>조회수 9.8천회  1년 전  #뷰민라</p>          
-          <p>'소녀의 소년' in Beautiful Mint Life 2022</p>
+          <p>조회수 {loadedVideo?.views}회  {timeago(loadedVideo?.createdAt)}  #뷰민라</p>          
+          <p>{loadedVideo?.description}</p>
           <button>더보기</button>
         </Info>
         {/* Comments */}
-        <Comments />
+        <Comments videoId={videoId}/>
       </Content>
 
 

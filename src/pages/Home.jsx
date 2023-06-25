@@ -21,7 +21,7 @@ const Home = ({type}) => {
   console.log(videos);
   return (
     <Container>
-        {videos?.map(video=><Card key={video._id} video={video}/>)}
+        {videos?.map(video=><Card key={video?._id} video={video}/>)}
     </Container>
   )
 }

@@ -1,6 +1,8 @@
 import styled from 'styled-components'
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import { useState } from 'react';
+import { useSelector } from "react-redux"
+import Avatar from './Avatar';
 
 const Container = styled.div`
   margin-top:20px;
@@ -13,12 +15,6 @@ const Wrapper = styled.div`
   align-items: center;
   gap:20px;
 `
-const Avatar = styled.span`
-  height:40px;
-  width:40px;
-  background-color: lightslategray;
-  border-radius: 50%;
-`
 
 const CommentForm = styled.form`
   flex:1;
@@ -26,7 +22,6 @@ const CommentForm = styled.form`
   input {
     border:none;
     outline:none;
-    border-bottom:solid  ${({active})=> active ? '3px' : '1px'} ${({theme})=>theme.secondary};
     background-color: transparent;
     color:${({theme})=>theme.text};
     width:100%;
@@ -35,7 +30,7 @@ const CommentForm = styled.form`
   }
 `
 const Actions = styled.div`
-  display: ${({active})=> active ? 'flex' : 'none'};
+  display: flex;
   justify-content: space-between;
   margin-top:10px;
 
@@ -66,24 +61,53 @@ const IcoinBtn = styled.button`
 `
 
 
-const CommentAdd = () => {
+const CommentAdd = ({videoId, pushNewComment}) => {
   const [ isActive, setIsActive ] = useState(false); 
+  const [ text, setText ] = useState('');
+  const { currentUser } = useSelector(state=>state.user)
 
+  const handleCancel = () => {
+    setText('')
+    setIsActive(false);  
+  }
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if(text.trim()==='') return;
+    const response = await fetch(`/comment/${videoId}`,{
+      headers: { "Content-Type":"application/json" },
+      method:"POST",
+      body: JSON.stringify({text})
+    });
+
+    if(!response.ok) {
+      console.log(response)
+      return
+    }
+
+    const newComment = await response.json();
+    const userId = {
+      name : currentUser.name || currentUser.email,
+      avatar : currentUser.avatar
+    }
+
+    pushNewComment({...newComment, userId});
+    handleCancel(); 
+  }
   return (
     <Container>
       <Wrapper>
-          <Avatar />
-          <CommentForm active={isActive}>
-            <input placeholder='댓글 추가' onFocus={()=>setIsActive(true)} onBlur={()=>setIsActive(false)}/>
-            <Actions active={isActive}>
+          <Avatar url={currentUser?.avatar}/>
+          <CommentForm>
+            <input placeholder='댓글 추가' onChange={e=>setText(e.target.value)} value={text} onFocus={()=>setIsActive(true)} />
+            {isActive && <Actions>
               <IcoinBtn>
                 <SentimentSatisfiedAltIcon />
               </IcoinBtn>
               <div>
-                <CancelBtn>취소</CancelBtn>
-                <SubmitBtn>댓글</SubmitBtn>
+                <CancelBtn onClick={handleCancel}>취소</CancelBtn>
+                <SubmitBtn onClick={handleSubmit}>댓글</SubmitBtn>
               </div>
-            </Actions>
+            </Actions>}
           </CommentForm>
       </Wrapper>
     </Container>
