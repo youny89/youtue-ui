@@ -7,6 +7,7 @@ const StyledAvatar = styled.img`
     border-radius: 100%;;
     display: ${({type})=>type==='sm' && 'none'};
     object-fit: cover;
+    cursor: pointer;
 ` 
 const DefaultAvatar = styled.span`
     height:30px;
@@ -15,10 +16,12 @@ const DefaultAvatar = styled.span`
     border-radius: 100%;;
     display: ${({type})=>type==='sm' && 'none'};
     object-fit: cover;
+    cursor: pointer;
+
 ` 
 
 const Avatar = ({type, url, handleClick}) => {
-  return url ? <StyledAvatar type={type} src={url} onClick={handleClick}/> : <DefaultAvatar type={type}/>
+  return url ? <StyledAvatar type={type} src={url} onClick={handleClick}/> : <DefaultAvatar type={type} onClick={handleClick}/>
 }
 
 export default Avatar

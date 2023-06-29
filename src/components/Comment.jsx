@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import Avatar from './Avatar';
 import timeago from '../utils/timeago';
 import { useState } from 'react';
@@ -8,7 +9,6 @@ import { useSelector } from "react-redux"
 
 const Container = styled.div`
     display: flex;
-    /* flex-direction: column; */
     gap:20px;
     margin-top:20px;
 `
@@ -59,13 +59,53 @@ const Info = styled.div`
     }
   }
 `
+const DeleteButton = styled.button`
+    outline:none;
+    border:none;
+    background: transparent;
+    color:${({theme})=>theme.lightText};
+    gap:6px;
+    align-items: center;
+    position: relative;
+    width:60px;
+    span {
+      font-size:12px;
+      transform: translateX(-50%);
+      position: absolute;
+      right:10px;
+      padding:6px 6px;
+      color:${({theme})=>theme.text};
+      background-color:${({theme})=>theme.darkerBg};
+      opacity: 0;
+      transition: all ease-in-out .5s;
+      width:inherit;
+      border-radius: 20px;
+    }
 
-const Comment = ({comment}) => {
+    cursor: pointer;
+    &:disabled {
+      cursor: not-allowed;
+    }
+    &:hover{
+      opacity:0.8;
+      span {
+        opacity:0.8;
+      }
+    }
+    svg{
+      font-size:18px;
+      color:tomato;
+    }
+`
+
+const Comment = ({comment, pullDeletedComment}) => {
   const { currentUser } = useSelector(state=>state.user);
   const [ data, setData ] = useState(comment || {});
   const [ submitting, setSubmitting] = useState(false);
 
   const handleLike =async () => {
+    if(!currentUser) return;
+
     setSubmitting(true)
     const response = await fetch(`/comment/${comment._id}/like`,{ method: "put"});  
     if(!response.ok) return;
@@ -83,6 +123,8 @@ const Comment = ({comment}) => {
   }
 
   const handleDislike =async () => {
+    if(!currentUser) return;
+
     setSubmitting(true)
     const response = await fetch(`/comment/${comment._id}/dislike`,{ method: "put"});  
     if(!response.ok) return;
@@ -99,9 +141,18 @@ const Comment = ({comment}) => {
       }
     })
   }
-  
-
-
+  const handleDelete = async () => {
+    if(!currentUser) return;
+    setSubmitting(true)
+    const response = await fetch(`/comment/${data._id}`,{ method: 'delete'});
+    if(!response.ok){
+      console.log('댓글을 삭제 할수 없습니다.')
+      setSubmitting(false);
+      return;
+    }
+    pullDeletedComment(data._id)
+    setSubmitting(false);
+  }
   return (
     <Container>
       <Avatar url={data.userId?.avatar}/>
@@ -112,10 +163,16 @@ const Comment = ({comment}) => {
         </div>
         <p>{data.text}</p>
         <div>
-          <button disabled={submitting} onClick={handleLike}><ThumbUpOffAltIcon/> {data.likes?.length}</button>
-          <button disabled={submitting} onClick={handleDislike}><ThumbDownOffAltIcon/>{data.disLikes?.length}</button>
+          <button disabled={submitting } onClick={handleLike}><ThumbUpOffAltIcon/> {data.likes?.length}</button>
+          <button disabled={submitting } onClick={handleDislike}><ThumbDownOffAltIcon/>{data.disLikes?.length}</button>
         </div>
       </Info>
+      {currentUser && currentUser?._id.toString() === data?.userId?._id?.toString() && 
+        <DeleteButton onClick={handleDelete} disabled={submitting}>
+          <span>삭제</span>
+          <DeleteOutlineIcon />
+        </DeleteButton>
+      }
     </Container>
   )
 }

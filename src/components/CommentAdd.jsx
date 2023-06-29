@@ -3,6 +3,7 @@ import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt
 import { useState } from 'react';
 import { useSelector } from "react-redux"
 import Avatar from './Avatar';
+import { useNavigate } from "react-router-dom"
 
 const Container = styled.div`
   margin-top:20px;
@@ -16,7 +17,7 @@ const Wrapper = styled.div`
   gap:20px;
 `
 
-const CommentForm = styled.form`
+const CommentForm = styled.div`
   flex:1;
   
   input {
@@ -54,6 +55,9 @@ const SubmitBtn = styled.button`
   padding:6px 14px;
   border-radius: 16px;;
   margin-left:10px;
+  &:disabled {
+    cursor: not-allowed;
+  }
 `
 const IcoinBtn = styled.button`
   background-color: transparent;
@@ -65,14 +69,24 @@ const CommentAdd = ({videoId, pushNewComment}) => {
   const [ isActive, setIsActive ] = useState(false); 
   const [ text, setText ] = useState('');
   const { currentUser } = useSelector(state=>state.user)
-
+  const navigate = useNavigate()
   const handleCancel = () => {
     setText('')
     setIsActive(false);  
   }
+
+  const handleFocus = () => {
+    if(!currentUser) {
+      navigate('/login')
+      return;
+    }
+    setIsActive(true)
+
+  }
+
   const handleSubmit = async e => {
     e.preventDefault();
-    if(text.trim()==='') return;
+    if(text.trim()==='' || !currentUser) return;
     const response = await fetch(`/comment/${videoId}`,{
       headers: { "Content-Type":"application/json" },
       method:"POST",
@@ -86,6 +100,7 @@ const CommentAdd = ({videoId, pushNewComment}) => {
 
     const newComment = await response.json();
     const userId = {
+      _id:currentUser._id,
       name : currentUser.name || currentUser.email,
       avatar : currentUser.avatar
     }
@@ -97,15 +112,15 @@ const CommentAdd = ({videoId, pushNewComment}) => {
     <Container>
       <Wrapper>
           <Avatar url={currentUser?.avatar}/>
-          <CommentForm>
-            <input placeholder='댓글 추가' onChange={e=>setText(e.target.value)} value={text} onFocus={()=>setIsActive(true)} />
-            {isActive && <Actions>
+          <CommentForm >
+            <input placeholder='댓글 추가' onChange={e=>setText(e.target.value)} value={text} onFocus={handleFocus} />
+            {isActive  && <Actions>
               <IcoinBtn>
                 <SentimentSatisfiedAltIcon />
               </IcoinBtn>
               <div>
-                <CancelBtn onClick={handleCancel}>취소</CancelBtn>
-                <SubmitBtn onClick={handleSubmit}>댓글</SubmitBtn>
+                <CancelBtn type="button" onClick={handleCancel}>취소</CancelBtn>
+                <SubmitBtn type="submit" onClick={handleSubmit} disabled={!currentUser}>댓글</SubmitBtn>
               </div>
             </Actions>}
           </CommentForm>

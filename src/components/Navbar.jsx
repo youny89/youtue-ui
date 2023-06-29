@@ -12,12 +12,14 @@ import { useState } from "react";
 import { logout } from "../redux/userSlice";
 import {setMode  } from "../redux/themeSlice"
 
+
 const Container = styled.div`
   background: ${({theme})=>theme.bg};
   position: sticky;
   top:0;
-  height: fit-content;
-  padding:20px;
+  height:80px;
+  padding:0 20px;
+  
 `
 const Wrapper = styled.div`
   display: flex;
@@ -98,20 +100,7 @@ const LoginButton = styled.div`
       color:${({theme})=>theme.primary};
     }
 `
-const Tags = styled.div`
-  display: flex;
-  align-items: center;
-  gap:10px;
-  margin-top:20px;
-  a {
-    padding:10px;
-    border-radius: 6px;
-    background:${({theme})=>theme.secondary};
-    color:${({theme})=>theme.text};
-    font-size:14px;
-    cursor: pointer;
-  }
-`
+
 const UserMenu = styled.ul`
   position: absolute;
   top:60px;
@@ -127,10 +116,13 @@ const UserMenu = styled.ul`
   overflow: hidden;
   li {
     cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     padding:10px 20px;
+    a{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color:${({theme})=>theme.lightText};
+    }
     &:hover{
       opacity: 0.7;
       background-color:${({theme})=>theme.secondary};
@@ -147,7 +139,7 @@ const Navbar = () => {
   const handleLogout= async () => {
     dispath(logout());
     await fetch('auth/logout',{ method : 'post'});
-    navigate('/login');
+    navigate('/');
   }
   const handleTheme = () => {
     dispath(setMode());
@@ -167,28 +159,31 @@ const Navbar = () => {
             </Link>
           </LoginButton>}
           {currentUser && <>
-            <Avatar url={currentUser.avatar} handleClick={()=>setOpenUserMenu(prev=>!prev)}/>
+            <Avatar url={currentUser?.avatar} handleClick={()=>setOpenUserMenu(prev=>!prev)}/>
             { openUserMenu && <UserMenu>
               <li>
-                <VideoCallIcon/>
-                비디오 업로드
+                <Link>
+                  <VideoCallIcon/>
+                  비디오 업로드
+                </Link>
+                </li>
+              <li>
+                <Link to="/account">
+                  <AccountCircleOutlinedIcon/>
+                  계정 관리
+                </Link>
                 </li>
               <li onClick={handleLogout}>
-                <LogoutIcon />
-                로그아웃
+                <Link>
+                  <LogoutIcon />
+                  로그아웃
+                </Link>
               </li>
             </UserMenu>}
           </>}
         </Icons>
       </Wrapper>
-      <Tags>
-        <Link to="/">전체</Link>
-        <Link to="/tags?tags=음악">음악</Link>
-        <Link to="/tags?tags=뉴스">뉴스</Link>
-        <Link to="/tags?tags=실시간">실시간</Link>
-        <Link to="/tags?tags=요리">요리</Link>
-        <Link to="/tags?tags=최신">최근에 업로드된 영상</Link>
-      </Tags>
+
     </Container>
   )
 }

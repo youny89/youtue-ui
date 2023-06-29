@@ -11,7 +11,7 @@ html,body{
     font-family: 'Nanum Gothic', sans-serif;
     
 }
-button{
+a,button{
     font-family: 'Nanum Gothic', sans-serif;
 }
 ::-webkit-scrollbar {

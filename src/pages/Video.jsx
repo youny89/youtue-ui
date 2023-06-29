@@ -5,8 +5,8 @@ import ShareIcon from '@mui/icons-material/Share';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Comments from "../components/Comments"
 import Card from "../components/Card"
-import { useLocation } from 'react-router-dom';
-import { useCallback, useEffect} from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useEffect} from 'react';
 import timeago from '../utils/timeago';
 import { useSelector, useDispatch } from "react-redux"
 import {
@@ -16,6 +16,7 @@ import {
   like,
   disLike
 } from "../redux/videoSlice"
+import { subscribed, unSubscribed } from "../redux/userSlice"
 import Avatar from '../components/Avatar';
 
 const Container = styled.div`
@@ -51,6 +52,9 @@ const Creator = styled.div`
     display: flex;
     flex-direction: column;
     gap:4px;
+  }
+  a{
+    color:${({theme})=>theme.text}
   }
 `
 
@@ -172,14 +176,32 @@ const Video = () => {
   },[videoId, dispatch])
 
 
-  const handleLike = useCallback(async () => {
+  const handleLike = async () => {
+    if(!currentUser) return;
+
     await fetch(`/video/${videoId}/like`,{ method:'put' });
     dispatch(like(currentUser._id))
-  },[videoId])
+  }
 
   const handleDisLike = async () => {
+    if(!currentUser) return;
+
       await fetch(`/video/${videoId}/dislike`,{ method:'put' });
       dispatch(disLike(currentUser._id))
+  }
+
+  const handleSubscribe = async (subId) => {
+    const response = await fetch(`/user/subscribe/${subId}`, { method: 'put' })
+    console.log(response);
+    if(!response.ok) return;
+    dispatch(subscribed(subId))
+
+  }
+  const handleUnSubscribe = async (subId) => {
+    const response = await fetch(`/user/unsubscribe/${subId}`, { method: 'put' })
+    console.log(response);
+    if(!response.ok) return;
+    dispatch(unSubscribed(subId));
   }
 
   return (
@@ -198,12 +220,13 @@ const Video = () => {
         <Title>{loadedVideo?.title}</Title>
         <Detail>
           <Creator>
-            <Avatar url={loadedVideo?.creator?.avatar}/>
+              <Avatar url={loadedVideo?.creator?.avatar}/>
             <div>
-              <span>{loadedVideo?.creator?.name}</span>
-              <small>구독자: 0명</small>
+              <Link to={`/user/${loadedVideo.creatorId}`}><span>{loadedVideo?.creator?.name}</span> </Link>
+              <small>구독자: {loadedVideo?.creator?.numberOfSubscribers}명</small>
             </div>
-            <SubscribeButton>구독</SubscribeButton>
+             {currentUser && currentUser.subscribedUsers.includes(loadedVideo.creatorId) && <SubscribeButton onClick={()=>handleUnSubscribe(loadedVideo.creatorId)}>구독 중</SubscribeButton>}
+              {currentUser && !currentUser.subscribedUsers.includes(loadedVideo.creatorId) && currentUser._id !== loadedVideo.creatorId && <SubscribeButton onClick={()=>handleSubscribe(loadedVideo.creatorId)}>구독</SubscribeButton>}
           </Creator>
           <Buttons>
             <LikesButtons>

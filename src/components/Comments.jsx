@@ -38,29 +38,38 @@ const CommentList = styled.div`
 // Need video id
 const Comments = ({videoId}) => {
 
-  // const [comments, setComments] = useState([]);
   const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState()
   const [totalNumber, setTotalNumber] = useState(0);
 
   useEffect(() => {
     const loadComments = async () => {
+      setLoading(true)
       const response = await fetch(`/comment/${videoId}`)
       if(!response.ok) {
         return
       }
+      
       const {comments,totalNumber} = await response.json();
+
+      setLoading(false);
       setComments(comments)
       setTotalNumber(totalNumber)
     };
 
     loadComments();
-  },[])
+  },[videoId])
 
   const pushNewCommentHandler = (newComment) => {
-    console.log('pushNewCommentHandler : ',newComment);
     setComments(prev=>[newComment, ...prev]);
     setTotalNumber(prev=>prev+1);
   }
+  const pullDeletedCommentHandler = (id) => {
+    setComments(prev=>prev.filter(c=>c._id !== id));
+    setTotalNumber(prev=>prev-1);
+  }
+
+  console.log('렌더링 댓글 컴포넌트')
 
   return  (
     <Conatiner>
@@ -72,8 +81,9 @@ const Comments = ({videoId}) => {
       <CommentAdd videoId={videoId} pushNewComment={pushNewCommentHandler}/>
 
       <CommentList>
-        {comments && comments?.length === 0 && <p> 댓글이 없어요.</p>}
-        {comments && comments?.map(comment=><Comment key={comment._id} comment={comment}/>)}
+        {loading && <p>로딩중...</p>}
+        {!loading && comments && comments?.length === 0 && <p> 댓글이 없어요.</p>}
+        {comments && comments?.map(comment=><Comment key={comment._id} comment={comment} pullDeletedComment={pullDeletedCommentHandler}/>)}
       </CommentList>
       
     </Conatiner>

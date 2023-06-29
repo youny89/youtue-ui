@@ -3,11 +3,12 @@ import styled from 'styled-components'
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import { useDispatch, useSelector } from "react-redux"
 import {loginStart,loginFail,loginSuccess} from "../redux/userSlice"
 import { signInWithPopup } from "firebase/auth"
 import { auth, provider} from "../firebase"
+import LoadingButton from '../components/LoadingButton';
 
 const Container = styled.div`
     height: 100vh;
@@ -141,13 +142,12 @@ const ErrorMessage = styled.div`
 const Login = () => {
     const naviate = useNavigate()
     const dispatch = useDispatch();
-
+    const {loading, error} = useSelector(state=>state.user);
     const [isLogin,setIsLogin] = useState(true);
+    const [submitting,setSubmitting] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
-
-    const { currentUser } = useSelector(state=>state.user);
 
 
     const handleLoginWithGoogle = async () => {
@@ -203,18 +203,14 @@ const Login = () => {
             if(response.ok) {
                 const data = await response.json();
                 dispatch(loginSuccess(data));
-                console.log('로그인 성공!')
-                naviate('/login')
+                naviate('/')
             }
             if(!response.ok && response.status === 400) {
                 const errorData = await response.json();
-                console.log('errorData : ',errorData);
                 dispatch(loginFail(errorData.message));
-                
             } 
         } catch (error) {
-            console.log(error);
-            dispatch(loginFail())
+            dispatch(loginFail('로그인 할수 없습니다. 잠시 후 다시 시도해주세요.'))
         } 
     }
 
@@ -228,7 +224,7 @@ const Login = () => {
                     </Link>
                 </BackButton>
                 <Title>Youtube-Clone {isLogin ? '로그인':'회원가입'}</Title>
-                {/* {error && <ErrorMessage>{error}</ErrorMessage>} */}
+                {error && <ErrorMessage>{error}</ErrorMessage>}
                 <InputItem>
                     <label htmlFor='email'>이메일</label>
                     <input type='email' name='email' placeholder='email' required onChange={e=> setEmail(e.target.value)}/>
@@ -244,10 +240,12 @@ const Login = () => {
                 </InputItem> 
                 }
                 <InputItem>
-                    <button  type="submit" onClick={handleSubmit}>{isLogin ? '로그인':'회원가입'}</button>
+                    <button  type="submit" onClick={handleSubmit} disabled={loading}>
+                        { loading ? <LoadingButton /> : !loading && isLogin ? '로그인':'회원가입' }
+                    </button>
                 </InputItem>
-                <ActionButton onClick={()=>setIsLogin(prev=>!prev)}>{isLogin ? '회원가입 하러 가기':'로그인 하기'} <ArrowForwardOutlinedIcon /></ActionButton>
-                <GoogleButton onClick={handleLoginWithGoogle}>
+                <ActionButton onClick={()=>setIsLogin(prev=>!prev)} disabled={loading}>{isLogin ? '회원가입 하러 가기':'로그인 하기'} <ArrowForwardOutlinedIcon /></ActionButton>
+                <GoogleButton onClick={handleLoginWithGoogle} disabled={loading}>
                     <GoogleIcon/>
                     구글 로그인
                 </GoogleButton>
